@@ -19,66 +19,140 @@ namespace InscricaoAula.Controllers
             _context = context;
         }
 
-        // (Amanhã vamos criar a parte GET, que mostra a página)
-        // public IActionResult Index()
-        // {
-        //     return View();
-        // }
+        // ESTE É O MÉTODO GET (CARREGA A PÁGINA)
+        public async Task<IActionResult> Index()
+        {
+            int idAulaFixa = 1;
+
+            // 1. Busca a aula (SEM .Include)
+            var aula = await _context.Aulas.FirstOrDefaultAsync(a => a.Id == idAulaFixa);
+
+            if (aula == null)
+            {
+                ViewBag.NomeAula = "Aula não encontrada";
+                ViewBag.VagasRestantes = 0;
+                ViewBag.MaxVagas = 0;
+                ViewBag.DataAula = "Indisponível";
+            }
+            else
+            {
+                // 2. Busca a contagem de inscrições SEPARADAMENTE (MAIS EFICIENTE)
+                var contagemInscricoes = await _context.Inscricoes
+                    .CountAsync(i => i.AulaColetivaId == idAulaFixa);
+
+                // 3. Calcula as vagas
+                int vagasRestantes = aula.MaxVagas - contagemInscricoes;
+
+                // Envia os dados para a View (página)
+                ViewBag.NomeAula = aula.Nome;
+                ViewBag.VagasRestantes = vagasRestantes;
+                ViewBag.MaxVagas = aula.MaxVagas;
+                ViewBag.DataAula = aula.DataHora.ToString("dd/MM/yyyy 'às' HH:mm");
+            }
+
+            return View(new Inscricao());
+        }
 
 
         // =========== LÓGICA DE HOJE (DIA 1) ===========
 
         // Este método [HttpPost] recebe os dados do formulário
         [HttpPost]
-        [ValidateAntiForgeryToken] // (Boa prática de segurança)
-        public async Task<IActionResult> Inscrever(Inscricao inscricao)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Inscrever([Bind("NomeParticipante,EmailParticipante")] Inscricao inscricao)
         {
-            // Vamos assumir que só temos 1 aula, a aula de ID=1
             int idAulaFixa = 1;
             inscricao.AulaColetivaId = idAulaFixa;
 
-            try
+            ModelState.Remove(nameof(inscricao.Aula));
+            ModelState.Remove(nameof(inscricao.AulaColetivaId));
+
+            if (ModelState.IsValid)
             {
-                // 1. Buscamos a aula e contamos quantas inscrições ela já tem
-                var aula = await _context.Aulas
-                    .Include(a => a.Inscricoes) // Inclui as inscrições na contagem
-                    .FirstOrDefaultAsync(a => a.Id == idAulaFixa);
-
-                if (aula == null)
+                try
                 {
-                    // (Mensagem de feedback para amanhã)
-                    return View("Index"); // Recarrega a página com erro
-                }
+                    // 1. Buscamos a aula
+                    var aula = await _context.Aulas
+                        .FirstOrDefaultAsync(a => a.Id == idAulaFixa);
 
-                // 2. VALIDAÇÃO DE VAGAS
-                if (aula.Inscricoes.Count >= aula.MaxVagas)
-                {
-                    // (Mensagem de feedback para amanhã: "Aula Lotada")
-                    return View("Index"); // Recarrega a página com erro
-                }
+                    if (aula == null)
+                    {
+                        TempData["MensagemErro"] = "Erro: Aula não encontrada.";
+                        return RedirectToAction("Index");
+                    }
 
-                // 3. VALIDAÇÃO DE DUPLICIDADE (O banco já faz isso, mas podemos pré-verificar)
-                // (Amanhã melhoramos isso)
+                    // 2. VALIDAÇÃO DE VAGAS
+                    var contagemInscricoes = await _context.Inscricoes
+                        .CountAsync(i => i.AulaColetivaId == idAulaFixa);
 
-                // 4. Se passou nas validações, salva a inscrição
-                if (ModelState.IsValid) // Verifica se Nome e Email foram preenchidos
-                {
+                    if (contagemInscricoes >= aula.MaxVagas)
+                    {
+                        TempData["MensagemErro"] = "Que pena! As vagas para esta aula estão esgotadas.";
+                        return RedirectToAction("Index");
+                    }
+
+                    // =========== INÍCIO DA CORREÇÃO (TESTE 3) ===========
+                    // 3. VALIDAÇÃO DE DUPLICIDADE (Manual)
+                    // Verifica se já existe ALGUÉM nesta aula (idAulaFixa) com este email
+                    var emailJaInscrito = await _context.Inscricoes
+                        .AnyAsync(i => i.AulaColetivaId == idAulaFixa &&
+                                        i.EmailParticipante == inscricao.EmailParticipante);
+
+                    if (emailJaInscrito)
+                    {
+                        // ERRO: Email duplicado
+                        TempData["MensagemErro"] = $"O email '{inscricao.EmailParticipante}' já está inscrito nesta aula.";
+                        return RedirectToAction("Index");
+                    }
+                    // ============ FIM DA CORREÇÃO (TESTE 3) ============
+
+
+                    // 4. Se passou em TUDO, salva a inscrição
                     _context.Add(inscricao);
                     await _context.SaveChangesAsync();
 
-                    // (Mensagem de feedback para amanhã: "Sucesso!")
-                    return RedirectToAction("Index"); // Por enquanto, só recarrega a página
+                    TempData["MensagemSucesso"] = $"Inscrição realizada com sucesso, {inscricao.NomeParticipante}! Vemos você lá.";
+                    return RedirectToAction("Index");
+                }
+                catch (DbUpdateException) // O 'catch' agora é só um backup (para o SQLite)
+                {
+                    TempData["MensagemErro"] = $"O email '{inscricao.EmailParticipante}' já está inscrito nesta aula.";
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    TempData["MensagemErro"] = $"Ocorreu um erro inesperado: {ex.Message}";
+                    return RedirectToAction("Index");
                 }
             }
-            catch (DbUpdateException) // Pega o erro de duplicidade do banco
-            {
-                // (Mensagem de feedback para amanhã: "Email já cadastrado")
-                return View("Index"); // Recarrega a página com erro
-            }
 
-            // Se o ModelState for inválido (ex: email em branco)
-            return View("Index");
+            // Se o ModelState for inválido
+            await RecarregarDadosView();
+            return View("Index", inscricao);
         }
 
+        // Método auxiliar para recarregar o ViewBag quando o ModelState é inválido
+        private async Task RecarregarDadosView()
+        {
+            int idAulaFixa = 1;
+
+            // 1. Busca a aula (SEM .Include)
+            var aula = await _context.Aulas.FirstOrDefaultAsync(a => a.Id == idAulaFixa);
+
+            if (aula != null)
+            {
+                // 2. Busca a contagem SEPARADAMENTE
+                var contagemInscricoes = await _context.Inscricoes
+                    .CountAsync(i => i.AulaColetivaId == idAulaFixa);
+
+                int vagasRestantes = aula.MaxVagas - contagemInscricoes;
+
+                // 3. Envia os dados
+                ViewBag.NomeAula = aula.Nome;
+                ViewBag.VagasRestantes = vagasRestantes;
+                ViewBag.MaxVagas = aula.MaxVagas;
+                ViewBag.DataAula = aula.DataHora.ToString("dd/MM/yyyy 'às' HH:mm");
+            }
+        }
     }
 }

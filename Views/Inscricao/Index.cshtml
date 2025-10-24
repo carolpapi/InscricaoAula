@@ -1,0 +1,77 @@
+﻿@* O @model diz ao formulário quais dados ele espera (Nome e Email da classe Inscricao) *@
+@model InscricaoAula.Models.Inscricao
+@* (Lembre-se de verificar se 'InscricaoAula' é o nome correto do seu projeto/namespace) *@
+
+@{
+    ViewData["Title"] = "Inscrição";
+}
+
+<div class="text-center">
+
+    <h1 class="display-4">@ViewBag.NomeAula</h1>
+
+    <p class="">
+        <strong>Quando:</strong> @ViewBag.DataAula
+    </p>
+
+    @if (ViewBag.VagasRestantes > 0)
+    {
+        <h3>Vagas Restantes: @ViewBag.VagasRestantes de @ViewBag.MaxVagas</h3>
+
+        <hr />
+
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+
+                @* (Este formulário chama o método [HttpPost] "Inscrever" no InscricaoController) *@
+                <form asp-action="Inscrever" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="form-group mb-3">
+                        <label asp-for="NomeParticipante" class="control-label">Nome</label>
+                        <input asp-for="NomeParticipante" class="form-control" placeholder="Seu nome completo" />
+                        @* (O 'span' mostra erros como "Nome é obrigatório" se o Model state for inválido) *@
+                        <span asp-validation-for="NomeParticipante" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="EmailParticipante" class="control-label">Email</label>
+                        <input asp-for="EmailParticipante" class="form-control" placeholder="seu.email@exemplo.com" />
+                        @* (O 'span' mostra erros como "Email inválido") *@
+                        <span asp-validation-for="EmailParticipante" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <input type="submit" value="Quero me Inscrever!" class="btn btn-primary w-100" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+    else
+    {
+        <h3 class="text-danger">Que pena! As vagas para esta aula estão esgotadas.</h3>
+    }
+
+    @if (TempData["MensagemSucesso"] != null)
+    {
+        <div class="alert alert-success mt-3" role="alert">
+            @TempData["MensagemSucesso"]
+        </div>
+    }
+
+    @if (TempData["MensagemErro"] != null)
+    {
+        <div class="alert alert-danger mt-3" role="alert">
+            @TempData["MensagemErro"]
+        </div>
+    }
+
+</div>
+
+@* Esta seção é importante para que as validações (como "O nome é obrigatório")
+   funcionem no navegador antes mesmo de enviar o formulário. *@
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
