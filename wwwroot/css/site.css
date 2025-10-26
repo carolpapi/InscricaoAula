@@ -57,6 +57,7 @@ body {
     .content-card .display-4 {
         color: var(--cor-acento);
         font-weight: 600; /* Um pouco mais forte */
+        margin-bottom: 0; /* Remove a margem para o subtítulo ficar perto */
     }
 
     /* Texto descritivo e labels */
@@ -120,3 +121,12 @@ body {
         color: var(--cor-acento);
         font-weight: 600; /* Deixa o "Quando" ainda mais forte */
     }
+
+/* Estilo para o novo subtítulo */
+.lead-subtitle {
+    font-size: 1.5rem; /* 1.5x o tamanho da fonte normal */
+    color: var(--cor-texto-sutil); /* Cor cinza-claro sutil */
+    font-weight: 300; /* Fonte leve */
+    margin-top: -5px; /* Puxa o subtítulo para mais perto do título */
+    margin-bottom: 1.5rem; /* Empurra a data para baixo */
+}

@@ -35,7 +35,7 @@ namespace InscricaoAula
                     // Se não existir, cria a nossa aula de exemplo
                     context.Aulas.Add(new InscricaoAula.Models.AulaColetiva
                     {
-                        Nome = "Aula de Testes de Software",
+                        Nome = "Papo com a Papi",
                         DataHora = new DateTime(2025, 11, 17, 19, 0, 0), // 17/11/2025 às 19:00
                         MaxVagas = 25
                     });
@@ -63,7 +63,7 @@ namespace InscricaoAula
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Inscricao}/{action=Index}/{id?}");
 
             app.Run();
         }
