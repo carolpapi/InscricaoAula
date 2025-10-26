@@ -1,75 +1,82 @@
-﻿@* O @model diz ao formulário quais dados ele espera (Nome e Email da classe Inscricao) *@
-@model InscricaoAula.Models.Inscricao
-@* (Lembre-se de verificar se 'InscricaoAula' é o nome correto do seu projeto/namespace) *@
-
+﻿@model InscricaoAula.Models.Inscricao
 @{
     ViewData["Title"] = "Inscrição";
 }
 
-<div class="text-center">
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
 
-    <h1 class="display-4">@ViewBag.NomeAula</h1>
+            <div class="content-card">
 
-    <p class="">
-        <strong>Quando:</strong> @ViewBag.DataAula
-    </p>
+                <div class="text-center mb-4">
+                    <h1 class="display-4">@ViewBag.NomeAula</h1>
+                    <p class="lead-data-destaque">
+                        <strong>Quando:</strong> @ViewBag.DataAula
+                    </p>
+                </div>
 
-    @if (ViewBag.VagasRestantes > 0)
-    {
-        <h3>Vagas Restantes: @ViewBag.VagasRestantes de @ViewBag.MaxVagas</h3>
+                <div class="mb-4">
+                    <h3 class="border-bottom border-secondary pb-2">Sobre esta Aula</h3>
+                    <p>
+                        Esta é uma aula focada em demonstrar os principais conceitos de testes de software.
+                        Vamos explorar na prática como aprender o que testar,
+                        técnicas de testes e tudo sobre qualidade de software.
+                        Vem com a gente!
+                    </p>
+                </div>
 
-        <hr />
+                <hr class="border-secondary" />
 
-        <div class="row">
-            <div class="col-md-6 offset-md-3">
+                @if (ViewBag.VagasRestantes > 0)
+                {
+                    <h3 class="text-center mb-3">Vagas Restantes: @ViewBag.VagasRestantes de @ViewBag.MaxVagas</h3>
 
-                @* (Este formulário chama o método [HttpPost] "Inscrever" no InscricaoController) *@
-                <form asp-action="Inscrever" method="post">
-                    @Html.AntiForgeryToken()
-                    <div class="form-group mb-3">
-                        <label asp-for="NomeParticipante" class="control-label">Nome</label>
-                        <input asp-for="NomeParticipante" class="form-control" placeholder="Seu nome completo" />
-                        @* (O 'span' mostra erros como "Nome é obrigatório" se o Model state for inválido) *@
-                        <span asp-validation-for="NomeParticipante" class="text-danger"></span>
+                    <form asp-action="Inscrever" method="post">
+                        @Html.AntiForgeryToken() <div class="form-group mb-3">
+                            <label asp-for="NomeParticipante" class="control-label">Seu Nome Completo</label>
+                            <input asp-for="NomeParticipante" class="form-control form-control-lg" placeholder="Digite seu nome" />
+                            <span asp-validation-for="NomeParticipante" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="EmailParticipante" class="control-label">Seu Melhor Email</label>
+                            <input asp-for="EmailParticipante" class="form-control form-control-lg" placeholder="exemplo@email.com" />
+                            <span asp-validation-for="EmailParticipante" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <input type="submit" value="Quero me Inscrever!" class="btn btn-primary w-100 btn-lg" />
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <div class="text-center">
+                        <h3 class="text-danger">Que pena! As vagas para esta aula estão esgotadas :(</h3>
                     </div>
+                }
 
-                    <div class="form-group mb-3">
-                        <label asp-for="EmailParticipante" class="control-label">Email</label>
-                        <input asp-for="EmailParticipante" class="form-control" placeholder="seu.email@exemplo.com" />
-                        @* (O 'span' mostra erros como "Email inválido") *@
-                        <span asp-validation-for="EmailParticipante" class="text-danger"></span>
+                @if (TempData["MensagemSucesso"] != null)
+                {
+                    <div class="alert alert-success mt-3" role="alert">
+                        @TempData["MensagemSucesso"]
                     </div>
+                }
 
-                    <div class="form-group mt-3">
-                        <input type="submit" value="Quero me Inscrever!" class="btn btn-primary w-100" />
+                @if (TempData["MensagemErro"] != null)
+                {
+                    <div class="alert alert-danger mt-3" role="alert">
+                        @TempData["MensagemErro"]
                     </div>
-                </form>
+                }
+
             </div>
         </div>
-    }
-    else
-    {
-        <h3 class="text-danger">Que pena! As vagas para esta aula estão esgotadas.</h3>
-    }
-
-    @if (TempData["MensagemSucesso"] != null)
-    {
-        <div class="alert alert-success mt-3" role="alert">
-            @TempData["MensagemSucesso"]
-        </div>
-    }
-
-    @if (TempData["MensagemErro"] != null)
-    {
-        <div class="alert alert-danger mt-3" role="alert">
-            @TempData["MensagemErro"]
-        </div>
-    }
-
+    </div>
 </div>
 
-@* Esta seção é importante para que as validações (como "O nome é obrigatório")
-   funcionem no navegador antes mesmo de enviar o formulário. *@
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

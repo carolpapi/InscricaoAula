@@ -20,3 +20,103 @@ html {
 body {
   margin-bottom: 60px;
 }
+/* =================================================== */
+/* NOSSO TEMA CUSTOMIZADO (PRETO E AZUL ÁGUA)          */
+/* =================================================== */
+
+:root {
+    /* (Este é o nosso "azul água" principal. Você pode trocar este código HEX se quiser outro tom) */
+    --cor-acento: #40E0D0; /* (Turquesa) */
+
+    --cor-fundo-escuro: #1a1a1a;
+    --cor-card-escuro: #2b2b2b;
+    --cor-texto-claro: #f0f0f0;
+    --cor-texto-sutil: #ccc;
+}
+
+body {
+    background-color: var(--cor-fundo-escuro);
+    color: var(--cor-texto-sutil);
+}
+
+/* Garante que o container principal tenha um fundo escuro também */
+.pb-3 {
+    background-color: var(--cor-fundo-escuro) !important;
+}
+
+/* O "card" elegante que vai conter nosso formulário */
+.content-card {
+    background-color: var(--cor-card-escuro);
+    padding: 2.5rem;
+    border-radius: 15px; /* Bordas mais arredondadas */
+    margin-top: 3rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+    /* Títulos principais com a cor de acento */
+    .content-card .display-4 {
+        color: var(--cor-acento);
+        font-weight: 600; /* Um pouco mais forte */
+    }
+
+    /* Texto descritivo e labels */
+    .content-card p,
+    .content-card .control-label {
+        color: var(--cor-texto-sutil);
+        font-size: 1.1rem;
+    }
+
+    .content-card h3 {
+        color: var(--cor-texto-claro);
+    }
+
+/* Customiza o botão primário */
+.btn-primary {
+    background-color: var(--cor-acento);
+    border-color: var(--cor-acento);
+    color: var(--cor-fundo-escuro); /* Texto escuro no botão para contraste */
+    font-weight: 600;
+    padding: 10px 15px;
+    font-size: 1.1rem;
+}
+
+    .btn-primary:hover {
+        background-color: #31aaa0; /* Um tom um pouco mais escuro no hover */
+        border-color: #31aaa0;
+        color: var(--cor-fundo-escuro);
+    }
+
+/* Ajusta as cores dos inputs do formulário para o modo escuro */
+.form-control {
+    background-color: #3a3a3a;
+    color: var(--cor-texto-claro);
+    border: 1px solid #555;
+}
+
+    .form-control:focus {
+        background-color: #4a4a4a;
+        color: var(--cor-texto-claro);
+        border-color: var(--cor-acento);
+        box-shadow: 0 0 0 0.25rem rgba(64, 224, 208, 0.25);
+    }
+
+    .form-control::placeholder {
+        color: #888;
+    }
+
+/* Estilo para destacar a data e hora (Revisão) */
+.lead-data-destaque {
+    color: var(--cor-texto-claro); /* Texto branco (mais brilhante que o sutil) */
+    font-size: 1.4rem; /* Fonte significativamente maior */
+    font-weight: 500; /* Meio-termo (semi-bold) */
+    margin-bottom: 1.5rem; /* Mais espaço abaixo */
+    padding: 10px;
+    border-bottom: 1px solid #444; /* Uma linha sutil abaixo */
+    border-top: 1px solid #444; /* Uma linha sutil acima */
+}
+
+    /* Faz o "Quando:" usar a nossa cor de acento */
+    .lead-data-destaque strong {
+        color: var(--cor-acento);
+        font-weight: 600; /* Deixa o "Quando" ainda mais forte */
+    }
