@@ -11,10 +11,13 @@ namespace InscricaoAula.Models
         public int Id { get; set; } // Chave primária
 
         [Required(ErrorMessage = "O nome é obrigatório.")]
+        [StringLength(100, ErrorMessage = "O nome não pode ter mais que 100 caracteres.")] // <--
+        [RegularExpression(@"^[a-zA-Zá-úÁ-Úâ-ûÂ-Ûã-õÃ-ÕçÇ\s]+$", ErrorMessage = "O nome deve conter apenas letras e espaços.")] // <--
         public string NomeParticipante { get; set; }
 
         [Required(ErrorMessage = "O email é obrigatório.")]
-        [EmailAddress(ErrorMessage = "Email inválido.")]
+        // Substitui o [EmailAddress] por uma Regex mais rigorosa
+        [RegularExpression(@"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$", ErrorMessage = "Por favor, insira um formato de email válido (ex: nome@dominio.com).")]
         public string EmailParticipante { get; set; }
 
         // Chave Estrangeira
